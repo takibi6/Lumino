@@ -7,6 +7,15 @@
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
 
+
+//class MmdSceneShaderInterface
+//	: public detail::SceneShaderInterface
+//{
+//public:
+//	MmdSceneShaderInterface();
+//	virtual ~MmdSceneShaderInterface();
+//};
+
 /**
 	@brief
 */
@@ -32,6 +41,7 @@ LN_INTERNAL_ACCESS:
 
 	//virtual Material2* GetDefaultMaterial() override;
 	//virtual Material2* CreateMaterial() override;
+	virtual detail::SceneShaderInterface* CreateMaterialInterface() override;
 
 private:
 	//Material2*		m_defaultMaterial;

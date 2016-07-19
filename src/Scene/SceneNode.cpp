@@ -5,8 +5,49 @@
 #include <Lumino/Scene/SceneGraph.h>
 #include <Lumino/Scene/SceneNode.h>
 
+#include <Lumino/Graphics/Mesh.h>	// TODO: SceneShaderInterface に引っ張られている
+
+
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
+
+
+
+//==============================================================================
+// SceneShaderInterface
+//==============================================================================
+namespace detail
+{
+
+//------------------------------------------------------------------------------
+SceneShaderInterface::SceneShaderInterface()
+	: m_material(nullptr)
+{
+}
+
+//------------------------------------------------------------------------------
+SceneShaderInterface::~SceneShaderInterface()
+{
+}
+
+//------------------------------------------------------------------------------
+void SceneShaderInterface::SetMaterial(Material3* material)
+{
+	m_material = material;
+}
+
+//------------------------------------------------------------------------------
+void SceneShaderInterface::OnDrawingSubset(SceneNode* node, const detail::MaterialInstance& material)
+{
+	if (m_material != nullptr)
+	{
+		m_material->ApplyDeviceShaderVariables(node->GetOwnerSceneGraph()->GetManager()->GetGraphicsManager());
+	}
+}
+
+}
+
+
 
 //==============================================================================
 // ListObject
@@ -73,6 +114,7 @@ void SceneNode::SetOwnerSceneGraph(SceneGraph* owner)
 	m_ownerSceneGraph = owner;
 	if (m_ownerSceneGraph != old)
 	{
+		m_materialInterface.Attach(m_ownerSceneGraph->CreateMaterialInterface(), false);
 		OnOwnerSceneGraphChanged(m_ownerSceneGraph, old);
 	}
 }

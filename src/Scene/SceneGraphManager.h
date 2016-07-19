@@ -85,8 +85,8 @@ public:	// internal
 	void AddRenderingPass(RenderingPass* pass);
 	void RemoveRenderingPass(RenderingPass* pass);
 	void AddLight(Light* light);
-	void AddShader(MMEShader* shader);
-	void RemoveShader(MMEShader* shader);
+	void AddShader(detail::SceneShaderInterface* materialInterface);
+	void RemoveShader(detail::SceneShaderInterface* materialInterface);
 	SceneShaderList* GetShaderList() { return &m_sceneShaderList; }
 	Array<Camera*>* GetAllCameraList() { return &m_allCameraList; }
 

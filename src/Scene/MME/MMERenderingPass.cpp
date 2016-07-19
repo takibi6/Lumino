@@ -16,7 +16,7 @@ LN_NAMESPACE_SCENE_BEGIN
 //==============================================================================
 
 //------------------------------------------------------------------------------
-MMERenderingPass::MMERenderingPass(SceneGraphManager* manager, MMDPass mmdPass, MMEShader* ownerShader)
+MMERenderingPass::MMERenderingPass(SceneGraphManager* manager, MMDPass mmdPass, Shader* ownerShader)
 	: RenderingPass(manager)
 	, m_mmdPass(mmdPass)
 	, m_ownerShader(nullptr)

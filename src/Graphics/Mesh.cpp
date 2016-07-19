@@ -6,6 +6,8 @@
 #include <Lumino/Graphics/VertexBuffer.h>
 #include <Lumino/Graphics/IndexBuffer.h>
 #include <Lumino/Graphics/Mesh.h>
+#include "GraphicsManager.h"
+#include "RenderingCommand.h"
 
 LN_NAMESPACE_BEGIN
 
@@ -176,6 +178,28 @@ ShaderValue* Material3::FindShaderValue(const StringRef& name)
 		m_valueList.Add(name, v);
 	}
 	return v.get();
+}
+
+//------------------------------------------------------------------------------
+void Material3::ApplyDeviceShaderVariables(GraphicsManager* manager)
+{
+	auto* serializer = manager->GetShaderVariableCommitSerializeHelper();
+	auto& linkedVariableList = GetLinkedVariableList();
+	serializer->BeginSerialize();
+	for (auto& pair : linkedVariableList)
+	{
+		serializer->WriteValue(pair.variable->GetDeviceObject(), *pair.value);
+	}
+	RenderBulkData variablesData(serializer->GetSerializeData(), serializer->GetSerializeDataLength());
+
+	LN_ENQUEUE_RENDER_COMMAND_1(
+		ApplyDeviceShaderVariables, manager,
+		GraphicsManager*, manager,
+		RenderBulkData, variablesData,
+		{
+			auto* deserializer = manager->GetShaderVariableCommitSerializeHelper();
+			deserializer->Deserialize(variablesData.GetData(), variablesData.GetSize());
+		});
 }
 
 //==============================================================================

@@ -14,8 +14,9 @@ LN_NAMESPACE_SCENE_BEGIN
 //==============================================================================
 
 //------------------------------------------------------------------------------
-RenderingPass::RenderingPass(SceneGraphManager* manager/*, int passID, MMEShader* ownerShader*/)
+RenderingPass::RenderingPass(SceneGraphManager* manager, SceneGraph* ownerSceneGraph/*, int passID, MMEShader* ownerShader*/)
 	: m_manager(NULL)
+	, m_ownerSceneGraph(ownerSceneGraph)
 	, m_internalEntryID(-1)
 {
 	LN_REFOBJ_SET(m_manager, manager);

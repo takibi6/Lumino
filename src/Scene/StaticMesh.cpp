@@ -41,6 +41,7 @@ void StaticMesh::Initialize(SceneGraph* owner)
 
 
 	m_material = RefPtr<Material3>::MakeRef();
+	m_materialInterface->SetMaterial(m_material);
 
 
 	owner->GetManager()->GetDefault3DSceneGraph()->GetRootNode()->AddChild(this);
@@ -50,7 +51,7 @@ void StaticMesh::Initialize(SceneGraph* owner)
 //------------------------------------------------------------------------------
 void StaticMesh::DrawSubset(SceneGraphRenderingContext* dc, int subsetIndex)
 {
-	dc->BeginGraphicsContext()->DrawMesh(m_mesh, m_material);
+	dc->BeginGraphicsContext()->DrawMesh(m_mesh);
 }
 
 LN_NAMESPACE_END

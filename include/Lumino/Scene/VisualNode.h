@@ -106,7 +106,7 @@ public:
 	// IMMESubsetRenerer
 //	virtual void OnDrawSubset(int subsetIndex, void* userData, MMEShader* shader, pass) { DrawSubset(*((RenderingParams*)userData), subsetIndex); }
 
-	void DrawSubsetInternal(SceneGraphRenderingContext* dc, int subsetIndex, MMEShader* shader, ShaderPass* pass);
+	void DrawSubsetInternal(SceneGraphRenderingContext* dc, int subsetIndex, detail::SceneShaderInterface* materialInterface, ShaderPass* pass);
 
 	virtual void OnRender(SceneGraphRenderingContext* dc);
 	virtual void DrawSubset(SceneGraphRenderingContext* dc, int subsetIndex) {}

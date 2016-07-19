@@ -39,7 +39,7 @@ ShaderScriptCommandList::~ShaderScriptCommandList()
 }
 
 //------------------------------------------------------------------------------
-void ShaderScriptCommandList::Initialize(MMEShader* ownerShader)
+void ShaderScriptCommandList::Initialize(detail::SceneShaderInterface* ownerShader)
 {
 	m_ownerShader = ownerShader;
 }

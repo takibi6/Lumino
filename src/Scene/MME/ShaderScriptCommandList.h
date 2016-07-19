@@ -6,7 +6,7 @@
 
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
-class MMEShader;
+//class MMEShader;
 
 //class IMMESubsetRenerer
 //{
@@ -60,7 +60,7 @@ public:
 public:
 
 	/// 初期化
-	void Initialize(MMEShader* ownerShader);
+	void Initialize(detail::SceneShaderInterface* ownerShader);
 
 	/// テクニックの子パスのコマンドストを追加する
 	void AddChildPassCommandList(ShaderScriptCommandList* commandList);

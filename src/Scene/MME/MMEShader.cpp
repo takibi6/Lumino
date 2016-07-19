@@ -8,12 +8,13 @@
 #include "MMEShaderBuilder.h"
 #include "MMEShaderTechnique.h"
 #include "MMEShader.h"
+#include "MMEShaderErrorInfo.h"
 
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
 
 //==============================================================================
-// MMEShader
+// MmdSceneShaderInterface
 //==============================================================================
 
 static const unsigned char MMM_EffectHeader_Data[] =
@@ -23,30 +24,30 @@ static const unsigned char MMM_EffectHeader_Data[] =
 static const size_t MMM_EffectHeader_Data_Len = LN_ARRAY_SIZE_OF(MMM_EffectHeader_Data) - 1;
 
 //------------------------------------------------------------------------------
-MMEShader* MMEShader::Create(const char* code, int codeLength, MMEShaderErrorInfo* errorInfo, SceneGraphManager* manager)
-{
-	// TODO: 自動付加するべきだろうか？
-	StringA newCode(code, codeLength);
-	//StringA newCode((const char*)MMM_EffectHeader_Data, MMM_EffectHeader_Data_Len);
-	//newCode += StringA::GetNewLine();
-	//newCode += "#line 1";
-	//newCode += StringA::GetNewLine();
-	//newCode += StringA(code, codeLength);
-
-	RefPtr<MMEShader> mmeShader(LN_NEW MMEShader(manager), false);
-	mmeShader->Initialize(manager->GetGraphicsManager(), newCode.c_str(), newCode.GetLength());
-	MMEShaderBuilder::Create(manager, mmeShader, errorInfo);
-	return mmeShader.DetachMove();
-
-	//RefPtr<Shader> shader(LN_NEW Shader(), false);
-	//shader->Initialize(manager->GetGraphicsManager(), newCode.c_str(), newCode.GetLength());
-	//RefPtr<MMEShader> mmeShader(MMEShaderBuilder::Create(manager, shader, errorInfo), false);
-	//mmeShader.SafeAddRef();
-	//return mmeShader;
-}
-
+//MmdSceneShaderInterface* MmdSceneShaderInterface::Create(const char* code, int codeLength, MMEShaderErrorInfo* errorInfo, SceneGraphManager* manager)
+//{
+//	// TODO: 自動付加するべきだろうか？
+//	StringA newCode(code, codeLength);
+//	//StringA newCode((const char*)MMM_EffectHeader_Data, MMM_EffectHeader_Data_Len);
+//	//newCode += StringA::GetNewLine();
+//	//newCode += "#line 1";
+//	//newCode += StringA::GetNewLine();
+//	//newCode += StringA(code, codeLength);
+//
+//	RefPtr<MmdSceneShaderInterface> mmeShader(LN_NEW MmdSceneShaderInterface(manager), false);
+//	mmeShader->Initialize(manager->GetGraphicsManager(), newCode.c_str(), newCode.GetLength());
+//	MMEShaderBuilder::Create(manager, mmeShader, errorInfo);
+//	return mmeShader.DetachMove();
+//
+//	//RefPtr<Shader> shader(LN_NEW Shader(), false);
+//	//shader->Initialize(manager->GetGraphicsManager(), newCode.c_str(), newCode.GetLength());
+//	//RefPtr<MmdSceneShaderInterface> mmeShader(MMEShaderBuilder::Create(manager, shader, errorInfo), false);
+//	//mmeShader.SafeAddRef();
+//	//return mmeShader;
+//}
+//
 //------------------------------------------------------------------------------
-MMEShader::MMEShader(SceneGraphManager* manager)
+MmdSceneShaderInterface::MmdSceneShaderInterface(SceneGraphManager* manager)
 	: m_manager(NULL)
 	, m_mmeScriptOutput(MME_SCROUT_color)
 	, m_mmeScriptClass(MME_SCRCLS_object)
@@ -62,7 +63,7 @@ MMEShader::MMEShader(SceneGraphManager* manager)
 }
 
 //------------------------------------------------------------------------------
-MMEShader::~MMEShader()
+MmdSceneShaderInterface::~MmdSceneShaderInterface()
 {
 	LN_FOREACH(MMEShaderTechnique* tech, m_mmeShaderTechniqueList) {
 		tech->Release();
@@ -78,7 +79,32 @@ MMEShader::~MMEShader()
 }
 
 //------------------------------------------------------------------------------
-void MMEShader::UpdateSceneParams(const MMESceneParams& params, SceneGraphManager* scene)
+void MmdSceneShaderInterface::Clear()
+{
+	m_mmeScriptOutput = MME_SCROUT_color;
+	m_mmeScriptClass = MME_SCRCLS_object;
+	m_mmeScriptOrder = MME_SCRORDER_standard;
+	m_mmeShaderVariableList.Clear();
+	m_controlObjectVariables.Clear();
+	m_worldMatrixCalcMask = 0;
+	m_requiredLightCount = 0;
+	m_mmeShaderTechniqueList.Clear();
+}
+
+//------------------------------------------------------------------------------
+void MmdSceneShaderInterface::SetMaterial(Material3* material)
+{
+	if (m_material != material)
+	{
+		m_material = material;
+		Clear();
+		MMEShaderErrorInfo diag;	// TODO:
+		MMEShaderBuilder::Create(m_manager, this, &diag);
+	}
+}
+
+//------------------------------------------------------------------------------
+void MmdSceneShaderInterface::UpdateSceneParams(const MMESceneParams& params, SceneGraphManager* scene)
 {
 	ShaderVariable* var;
 	LN_FOREACH(MMEShaderVariable* sv, m_mmeShaderVariableList)
@@ -130,7 +156,7 @@ void MMEShader::UpdateSceneParams(const MMESceneParams& params, SceneGraphManage
 }
 
 //------------------------------------------------------------------------------
-void MMEShader::UpdateCameraParams(Camera* camera, const SizeF& viewPixelSize)
+void MmdSceneShaderInterface::UpdateCameraParams(Camera* camera, const SizeF& viewPixelSize)
 {
 	ShaderVariable* var;
 	LN_FOREACH(MMEShaderVariable* sv, m_mmeShaderVariableList)
@@ -206,7 +232,7 @@ void MMEShader::UpdateCameraParams(Camera* camera, const SizeF& viewPixelSize)
 }
 
 //------------------------------------------------------------------------------
-void MMEShader::UpdateNodeParams(SceneNode* node, Camera* affectCamera, const LightNodeList& affectLightList)
+void MmdSceneShaderInterface::UpdateNodeParams(SceneNode* node, Camera* affectCamera, const LightNodeList& affectLightList)
 {
 	LN_FOREACH(MMEShaderVariable* sv, m_mmeShaderVariableList)
 	{
@@ -405,7 +431,7 @@ void MMEShader::UpdateNodeParams(SceneNode* node, Camera* affectCamera, const Li
 }
 
 //------------------------------------------------------------------------------
-void MMEShader::UpdateSubsetParams(const detail::MaterialInstance& material)
+void MmdSceneShaderInterface::UpdateSubsetParams(const detail::MaterialInstance& material)
 {
 	LN_CHECK_ARG(material.m_owner->GetMaterialTypeId() == detail::MmdMaterialTypeId);
 
@@ -465,7 +491,7 @@ void MMEShader::UpdateSubsetParams(const detail::MaterialInstance& material)
 }
 
 //------------------------------------------------------------------------------
-void MMEShader::SetControllObjectParam(MMEShaderVariable* sv, const IMMESceneObject* obj)
+void MmdSceneShaderInterface::SetControllObjectParam(MMEShaderVariable* sv, const IMMESceneObject* obj)
 {
 	ShaderVariable* var = sv->Variable;
 
@@ -560,7 +586,7 @@ void MMEShader::SetControllObjectParam(MMEShaderVariable* sv, const IMMESceneObj
 }
 
 //------------------------------------------------------------------------------
-bool MMEShader::GetGeometryTransform(SceneNode* node, Camera* affectCamera, const LightNodeList& affectLightList, MMEVariableRequest req, int lightIndex, Matrix* outMatrix)
+bool MmdSceneShaderInterface::GetGeometryTransform(SceneNode* node, Camera* affectCamera, const LightNodeList& affectLightList, MMEVariableRequest req, int lightIndex, Matrix* outMatrix)
 {
 	switch (req)
 	{
@@ -693,7 +719,7 @@ bool MMEShader::GetGeometryTransform(SceneNode* node, Camera* affectCamera, cons
 }
 
 //------------------------------------------------------------------------------
-MMEShaderTechnique* MMEShader::FindTechnique(MMDPass mmdPass, bool UseTexture, bool UseSphereMap, bool UseToon, bool UseSelfShadow, int subsetIndex)
+MMEShaderTechnique* MmdSceneShaderInterface::FindTechnique(MMDPass mmdPass, bool UseTexture, bool UseSphereMap, bool UseToon, bool UseSelfShadow, int subsetIndex)
 {
 	/* MMM では複数のテクニックがマッチしても、実際に使われるのは
 	 * ファイル上で先に記述されている 1 つだけ。

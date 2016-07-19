@@ -303,15 +303,15 @@ void SceneGraphManager::RemoveRenderingPass(RenderingPass* pass)
 }
 
 //------------------------------------------------------------------------------
-void SceneGraphManager::AddShader(MMEShader* shader)
+void SceneGraphManager::AddShader(detail::SceneShaderInterface* materialInterface)
 {
-	m_sceneShaderList.Add(shader);
+	m_sceneShaderList.Add(materialInterface);
 }
 
 //------------------------------------------------------------------------------
-void SceneGraphManager::RemoveShader(MMEShader* shader)
+void SceneGraphManager::RemoveShader(detail::SceneShaderInterface* materialInterface)
 {
-	m_sceneShaderList.Remove(shader);
+	m_sceneShaderList.Remove(materialInterface);
 }
 
 

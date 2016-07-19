@@ -12,6 +12,23 @@
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
 
+
+//==============================================================================
+// MmdSceneShaderInterface
+//==============================================================================
+
+////------------------------------------------------------------------------------
+//MmdSceneShaderInterface::MmdSceneShaderInterface()
+//{
+//
+//}
+//
+////------------------------------------------------------------------------------
+//MmdSceneShaderInterface::~MmdSceneShaderInterface()
+//{
+//
+//}
+
 //==============================================================================
 // MMDSceneGraph
 //==============================================================================
@@ -118,6 +135,12 @@ void MMDSceneGraph::UpdateFrame(float elapsedTime)
 //{
 //	return LN_NEW MmdMaterial();
 //}
+
+//------------------------------------------------------------------------------
+detail::SceneShaderInterface* MMDSceneGraph::CreateMaterialInterface()
+{
+	return LN_NEW MmdSceneShaderInterface();
+}
 
 LN_NAMESPACE_SCENE_END
 LN_NAMESPACE_END

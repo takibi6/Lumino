@@ -211,12 +211,14 @@ void VisualNode::Render(RenderingParams& params)
 #endif
 
 //------------------------------------------------------------------------------
-void VisualNode::DrawSubsetInternal(SceneGraphRenderingContext* dc, int subsetIndex, MMEShader* shader, ShaderPass* pass)
+void VisualNode::DrawSubsetInternal(SceneGraphRenderingContext* dc, int subsetIndex, detail::SceneShaderInterface* materialInterface, ShaderPass* pass)
 {
 	// シェーダのサブセット単位のデータを更新する
-	if (shader != nullptr) {
-		shader->UpdateSubsetParams(*m_materialList.GetMaterialInstance(subsetIndex));
-	}
+	//if (shader != nullptr) {
+	//	shader->UpdateSubsetParams();
+	//}
+	//m_materialInterface->OnDrawingSubset(this);
+	materialInterface->OnDrawingSubset(this, *m_materialList.GetMaterialInstance(subsetIndex));
 
 	// パス開始
 	if (pass != nullptr) {

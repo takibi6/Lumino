@@ -333,6 +333,12 @@ void Basic2DSceneGraph::CreateCore(SceneGraphManager* manager)
 }
 
 //------------------------------------------------------------------------------
+detail::SceneShaderInterface* Basic2DSceneGraph::CreateMaterialInterface()
+{
+	return LN_NEW detail::SceneShaderInterface();
+}
+
+//------------------------------------------------------------------------------
 void Basic2DSceneGraph::UpdateFrame(float elapsedTime)
 {
 	SceneGraph::UpdateFrame(elapsedTime);

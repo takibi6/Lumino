@@ -2,6 +2,7 @@
 #pragma once
 #include "../../Internal.h"
 #include <Lumino/Graphics/Shader.h>
+#include <Lumino/Graphics/Mesh.h>		// TODO: for Material
 #include "MMETypes.h"
 #include "MMEShader.h"
 #include "MMEShaderTechnique.h"
@@ -134,19 +135,18 @@ static const char* gMMEAnnotationNames[ MME_MAX_ANNOTATIONS ] =
 };
 
 //------------------------------------------------------------------------------
-MMEShader* MMEShaderBuilder::Create(SceneGraphManager* manager, MMEShader* shader, MMEShaderErrorInfo* errorInfo)
+MmdSceneShaderInterface* MMEShaderBuilder::Create(SceneGraphManager* manager, MmdSceneShaderInterface* materialInterface, MMEShaderErrorInfo* errorInfo)
 {
-	MMEShaderBuilder builder(manager, shader, errorInfo);
+	MMEShaderBuilder builder(manager, materialInterface, errorInfo);
 	builder.Build();
 	return builder.m_mmeShader;
 }
 
 //------------------------------------------------------------------------------
-MMEShaderBuilder::MMEShaderBuilder(SceneGraphManager* manager, MMEShader* shader, MMEShaderErrorInfo* errorInfo)
-	: m_mmeShader(NULL)
+MMEShaderBuilder::MMEShaderBuilder(SceneGraphManager* manager, MmdSceneShaderInterface* materialInterface, MMEShaderErrorInfo* errorInfo)
+	: m_mmeShader(materialInterface)
 	, m_errorInfo(NULL)
 {
-	m_mmeShader = shader;
 }
 
 MMEShaderBuilder::~MMEShaderBuilder()
@@ -158,7 +158,8 @@ void MMEShaderBuilder::Build()
 {
 	//-----------------------------------------------------
 	// シェーダプログラム内のすべての変数をチェックする
-	LN_FOREACH(ShaderVariable* var, m_mmeShader->GetVariables())
+	auto& variables = m_mmeShader->GetMaterial()->GetShader()->GetVariables();
+	for (ShaderVariable* var : variables)
 	{
 		// シェーダ変数。とりあえずでフォルト値を入れておく
 		MMEShaderVariable* sv = LN_NEW MMEShaderVariable();
@@ -204,7 +205,8 @@ void MMEShaderBuilder::Build()
 
 	//-----------------------------------------------------
 	// テクニック情報作成
-	LN_FOREACH(ShaderTechnique* tech, m_mmeShader->GetTechniques())
+	auto& techniques = m_mmeShader->GetMaterial()->GetShader()->GetTechniques();
+	for (ShaderTechnique* tech : techniques)
 	{
 		MMEShaderTechnique* sstech = LN_NEW MMEShaderTechnique();
 		sstech->Initialize(m_mmeShader, tech, m_errorInfo);

@@ -13,8 +13,8 @@ LN_NAMESPACE_SCENE_BEGIN
 
 struct RenderingPriorityParams
 {
-	MMEShader*		Shader;
-	bool			Hide;
+	detail::SceneShaderInterface*	materialInterface;
+	bool						Hide;
 };
 
 /// MMD でいうところの MMDPass ("object" 等) と、オフスクリーンRTに相当する。
@@ -39,7 +39,7 @@ public:
 	/// もしユーザーがカスタムのパスを用意したい場合はこの ID を独自定義し、SceneNode::Render() 等で
 	/// カスタムの処理を実装することを想定している。
 	/// ownerShader は OFFSCREENRENDERTARGET としてこのパスを作るとき、生成元のシェーダを指定する
-	RenderingPass(SceneGraphManager* manager/*, int passID, MMEShader* ownerShader = NULL*/);
+	RenderingPass(SceneGraphManager* manager, SceneGraph* ownerSceneGraph/*, int passID, MMEShader* ownerShader = NULL*/);
 	virtual ~RenderingPass();
 
 public:
@@ -78,10 +78,12 @@ protected:
 
 	friend class SceneGraphManager;
 	SceneGraphManager*			m_manager;
+	SceneGraph*					m_ownerSceneGraph;
 	int							m_internalEntryID;		///< このパスに割り当てられるID (0 ～ MaxRenderingPass-1)
 	RefPtr<Texture>				m_renderTarget;			///< このパスの描画先となるレンダリングターゲット (NULL可。MMDPass の "zplot" であれば Zバッファがターゲットになる)
 	RefPtr<Texture>				m_depthBuffer;			///< このパスの描画先となる深度バッファ (NULL可)
 	RefPtr<MMEShader>			m_defaultShader;		///< このパスの描画でデフォルトとして使用されるシェーダ (シェーダを持っていない VisualNode に対して使われる)
+	RefPtr<detail::SceneShaderInterface>	m_defaultShaderInterface;
 	PriorityParamsEntryList		m_priorityEntryList;	///< このパスで優先的に使用されるシェーダ (シェーダを持っている VisualNode に対しても強制的にこちらを使う)
 	Nullable<Color>				m_clearColor;			///< パス開始時にレンダリングターゲットをクリアする色
 	Nullable<float>				m_clearDepth;			///< パス開始時に深度バッファをクリアするZ値

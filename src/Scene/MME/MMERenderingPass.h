@@ -10,7 +10,8 @@ class MMERenderingPass
 	: public RenderingPass
 {
 public:
-	MMERenderingPass(SceneGraphManager* manager, MMDPass mmdPass, MMEShader* ownerShader = NULL);
+	// ownerShader: オフスクリーンシーンを作った時のもととなったシェーダ
+	MMERenderingPass(SceneGraphManager* manager, MMDPass mmdPass, Shader* ownerShader = NULL);
 	virtual ~MMERenderingPass();
 
 private:
@@ -23,7 +24,7 @@ private:
 
 private:
 	MMDPass		m_mmdPass;
-	MMEShader*	m_ownerShader;			///< このパス (OFFSCREENRENDERTARGET) の生成元となったシェーダ
+	Shader*	m_ownerShader;			///< このパス (OFFSCREENRENDERTARGET) の生成元となったシェーダ
 };
 
 LN_NAMESPACE_SCENE_END

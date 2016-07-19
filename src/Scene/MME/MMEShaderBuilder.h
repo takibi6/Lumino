@@ -4,7 +4,7 @@
 
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
-class MMEShader;
+class MmdSceneShaderInterface;
 class MMEShaderErrorInfo;
 
 /// MMEShaderBuilder
@@ -19,10 +19,10 @@ class MMEShaderErrorInfo;
 class MMEShaderBuilder
 {
 public:
-	static MMEShader* Create(SceneGraphManager* manager, MMEShader* shader, MMEShaderErrorInfo* errorInfo);
+	static MmdSceneShaderInterface* Create(SceneGraphManager* manager, MmdSceneShaderInterface* materialInterface, MMEShaderErrorInfo* errorInfo);
 
 private:
-	MMEShaderBuilder(SceneGraphManager* manager, MMEShader* shader, MMEShaderErrorInfo* errorInfo);
+	MMEShaderBuilder(SceneGraphManager* manager, MmdSceneShaderInterface* materialInterface, MMEShaderErrorInfo* errorInfo);
 	~MMEShaderBuilder();
 
 	void Build();
@@ -61,7 +61,7 @@ private:
 
 private:
 
-	MMEShader*				m_mmeShader;
+	MmdSceneShaderInterface*	m_mmeShader;
 	MMEShaderErrorInfo*		m_errorInfo;
 
 };

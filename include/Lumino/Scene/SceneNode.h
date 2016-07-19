@@ -6,10 +6,51 @@
 #include <Lumino/Graphics/Shader.h>
 #include "MME/MMESceneObject.h"
 
+
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
 
 class SceneNodeList;
+class Material3;
+
+struct MMESceneParams;
+
+namespace detail
+{
+class MaterialInstance;
+
+// ノート描画直前、サブセット描画直前など、しかるべきタイミングで各ノードの持つshaderに値をセットする。
+// どんな値をどうセットするかは Scene の性質によって異なる。
+class SceneShaderInterface
+	: public RefObject
+{
+public:
+	SceneShaderInterface();
+	virtual ~SceneShaderInterface();
+
+	virtual void SetMaterial(Material3* material);
+	Material3* GetMaterial() const { return m_material; }
+
+
+	// Scene 単位で必要なパラメータを設定する
+	virtual void OnUpdateSceneParams(const MMESceneParams& params, SceneGraphManager* scene) {}
+
+	// Camera 単位で必要なパラメータを設定する
+	virtual void OnUpdateCameraParams(Camera* camera, const SizeF& viewPixelSize) {}
+
+	// Node 単位で必要なパラメータを設定する
+	virtual void OnUpdateNodeParams(SceneNode* node, Camera* affectCamera, const LightNodeList& affectLightList) {}
+
+	// Subset  単位で必要なパラメータを設定する
+	virtual void OnDrawingSubset(SceneNode* node, const detail::MaterialInstance& material);
+
+
+protected:
+	Material3*	m_material;
+};
+
+} // namespace detail
+
 
 /// SceneNode
 class SceneNode
@@ -130,7 +171,9 @@ public:
 	/// このノードを描画する
 	//virtual void Render(RenderingParams& params) {}
 
-	virtual void DrawSubsetInternal(SceneGraphRenderingContext* dc, int subsetIndex, MMEShader* shader, ShaderPass* pass) {};
+	// materialInterface: かならずしも、このノードが持つ m_materialInterface が使われるとは限らない。
+	// オフスクリーンレンダーターゲットからは別のシェーダが使われる。
+	virtual void DrawSubsetInternal(SceneGraphRenderingContext* dc, int subsetIndex, detail::SceneShaderInterface* materialInterface, ShaderPass* pass) {};
 
 	/// Z ソート用の比較関数 (距離と優先度でソート)
 	static bool CmpZAndPrioritySort(const SceneNode* left, const SceneNode* right);
@@ -153,6 +196,7 @@ LN_INTERNAL_ACCESS:
 	void Initialize(SceneGraph* owner);
 	void SetAutoRemove(bool enabled) { m_isAutoRemove = enabled; }
 	bool IsAutoRemove() const { return m_isAutoRemove; }
+	detail::SceneShaderInterface* GetMaterialInterface() const { return m_materialInterface; }
 
 private:
 	void SetOwnerSceneGraph(SceneGraph* owner);
@@ -160,6 +204,7 @@ private:
 protected:
 	SceneGraphManager*	m_manager;	// TODO: いらない
 	SceneGraph*			m_ownerSceneGraph;
+	RefPtr<detail::SceneShaderInterface>	m_materialInterface;
 	String				m_name;
 	Matrix				m_localMatrix;
 	SQTTransform		m_transform;

@@ -41,4 +41,6 @@ public:	// TODO:
 	int/*Material::SphereMode*/		SphereMode;			///< [PMX] スフィアテクスチャの合成モード
 };
 
+
+
 LN_NAMESPACE_END

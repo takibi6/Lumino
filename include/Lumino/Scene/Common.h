@@ -30,15 +30,15 @@ typedef RefPtr<Sprite2D>	Sprite2DPtr;
 class TileMap;
 typedef RefPtr<TileMap>		TileMapPtr;
 
-class MMEShader;
-class MMEShaderTechnique;
 
 class CameraBehavior;
 
 typedef Array<RenderingPass*>	RenderingPassList;
 typedef Array<Light*>			LightNodeList;
 typedef Array<SceneNode*>		SceneNodeArray;
-typedef Array<MMEShader*>		SceneShaderList;
+
+namespace detail { class SceneShaderInterface; }
+typedef Array<detail::SceneShaderInterface*>		SceneShaderList;
 
 /// ノード種別
 enum SceneNodeType

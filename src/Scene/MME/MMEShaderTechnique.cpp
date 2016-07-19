@@ -3,6 +3,7 @@
 #include "MMEShader.h"
 #include "MMEShaderErrorInfo.h"
 #include "MMEShaderTechnique.h"
+#include <Lumino/Graphics/Mesh.h>		// TODO: for Material
 
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
@@ -48,11 +49,11 @@ MMEShaderTechnique::~MMEShaderTechnique()
 }
 
 //------------------------------------------------------------------------------
-void MMEShaderTechnique::Initialize(MMEShader* shader, ShaderTechnique* tech, MMEShaderErrorInfo* errorInfo)
+void MMEShaderTechnique::Initialize(MmdSceneShaderInterface* shader, ShaderTechnique* tech, MMEShaderErrorInfo* errorInfo)
 {
 	m_errorInfo = errorInfo;
 	m_ownerShader = shader;
-	m_coreShader = shader;
+	m_coreShader = shader->GetMaterial()->GetShader();
 	m_technique = tech;
 
 	m_scriptCommandList.Initialize(m_ownerShader);

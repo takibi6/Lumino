@@ -1,6 +1,7 @@
 ﻿
 #pragma once
 #include "../Internal.h"
+#include <Lumino/Scene/SceneNode.h>
 #include "MMETypes.h"
 
 LN_NAMESPACE_BEGIN
@@ -12,14 +13,17 @@ class MMEShaderVariable;
 class MMEShaderTechnique;
 	
 /// MMEShader
-class MMEShader
-	: public Shader
+class MmdSceneShaderInterface
+	: public detail::SceneShaderInterface
+	//: public Shader
 {
 public:
 	static const int MaxAffectLights = 4;	///< 影響を受けるライトの最大数 (MMM は 3)
 
 	/// 作成
-	static MMEShader* Create(const char* code, int codeLength, MMEShaderErrorInfo* errorInfo, SceneGraphManager* manager);
+	//static MMEShader* Create(const char* code, int codeLength, MMEShaderErrorInfo* errorInfo, SceneGraphManager* manager);
+
+	virtual void SetMaterial(Material3* material) override;
 
 public:
 
@@ -54,9 +58,30 @@ public:
 	MMEShaderTechnique* FindTechnique(MMDPass mmdPass, bool UseTexture, bool UseSphereMap, bool UseToon, bool UseSelfShadow, int subsetIndex);
 
 
+	///////////////////////
+	virtual void OnUpdateSceneParams(const MMESceneParams& params, SceneGraphManager* scene) override
+	{
+		UpdateSceneParams(params, scene);
+	}
+	virtual void OnUpdateCameraParams(Camera* camera, const SizeF& viewPixelSize) override
+	{
+		UpdateCameraParams(camera, viewPixelSize);
+	}
+	virtual void OnUpdateNodeParams(SceneNode* node, Camera* affectCamera, const LightNodeList& affectLightList) override
+	{
+		UpdateNodeParams(node, affectCamera, affectLightList);
+	}
+	virtual void OnDrawingSubset(SceneNode* node, const detail::MaterialInstance& material) override
+	{
+		UpdateSubsetParams(material);
+	}
+
+
+
 private:
-	MMEShader(SceneGraphManager* manager);
-	virtual ~MMEShader();
+	MmdSceneShaderInterface(SceneGraphManager* manager);
+	virtual ~MmdSceneShaderInterface();
+	void Clear();
 
 	typedef Array<MMEShaderVariable*>	MMEShaderVariableList;
 	typedef Array<MMEShaderTechnique*>	MMEShaderTechniqueList;

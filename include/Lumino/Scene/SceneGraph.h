@@ -66,11 +66,13 @@ protected:
 
 	//virtual Material2* GetDefaultMaterial() = 0;
 	//virtual Material2* CreateMaterial() = 0;
+	virtual detail::SceneShaderInterface* CreateMaterialInterface() = 0;
 
 LN_INTERNAL_ACCESS:
 	//void AddNode(SceneNode* node) { m_allNodes.Add(node); }
 	//void RemoveNode(SceneNode* node) { m_allNodes.Remove(node); }
 	Array<Camera*>* GetAllCameraList() { return &m_allCameraList; }
+
 
 private:
 
@@ -102,6 +104,8 @@ private:
 	MouseState			m_rightMouseState;		///< マウスの右ボタンの状態
 	MouseState			m_middleMouseState;		///< マウスの中ボタンの状態
 	Point				m_mousePosition;		///< マウスの現在位置
+
+	friend class SceneNode;
 };
 
 
@@ -122,6 +126,7 @@ public:
 	Basic2DSceneGraph();
 	virtual ~Basic2DSceneGraph();
 	void CreateCore(SceneGraphManager* manager);
+	virtual detail::SceneShaderInterface* CreateMaterialInterface() override;
 
 private:
 	SceneNode*				m_defaultRoot;

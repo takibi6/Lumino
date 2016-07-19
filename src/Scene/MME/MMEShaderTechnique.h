@@ -11,7 +11,7 @@
 
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_SCENE_BEGIN
-class MMEShader;
+class MmdSceneShaderInterface;
 class MMEShaderPass;
 class MMEShaderErrorInfo;
 
@@ -38,10 +38,10 @@ public:
 public:
 
 	/// 初期化
-	void Initialize(MMEShader* shader, ShaderTechnique* tech, MMEShaderErrorInfo* errorInfo);
+	void Initialize(MmdSceneShaderInterface* shader, ShaderTechnique* tech, MMEShaderErrorInfo* errorInfo);
 
 	/// このテクニックを持つシェーダを取得する
-	MMEShader* GetOwnerShader() const { return m_ownerShader; }
+	MmdSceneShaderInterface* GetOwnerShader() const { return m_ownerShader; }
 
 	/// 描画パスを取得する
 	MMDPass GetMMDPass() const { return m_mmdPass; }
@@ -85,7 +85,7 @@ private:
 	typedef Array< std::pair<String, ShaderScriptCommandList> >	PassScriptCommandList;
 
 	MMEShaderErrorInfo*			m_errorInfo;
-	MMEShader*					m_ownerShader;
+	MmdSceneShaderInterface*					m_ownerShader;
 	Shader*			m_coreShader;	// TODO: m_ownerShader と同じ
 	ShaderTechnique*	m_technique;
 

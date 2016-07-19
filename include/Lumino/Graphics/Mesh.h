@@ -45,6 +45,7 @@ LN_INTERNAL_ACCESS:
 	};
 
 	const Array<ValuePair>& GetLinkedVariableList() { return m_linkedVariableList; }
+	void ApplyDeviceShaderVariables(GraphicsManager* manager);
 
 private:
 	void LinkVariables();
