@@ -57,24 +57,24 @@ void MeshModelObject::OnUpdateFrame(float elapsedTime)
 }
 
 //------------------------------------------------------------------------------
-void MeshModelObject::UpdateNodeRenderingParams(MMEShader* priorityShader)
-{
-	//Shader* core = priorityShader->GetCoreShader();
-	//ShaderVariable* v;
-
-	//v = core->FindVariable(_T("lnBoneTextureReciprocalSize"));
-	//if (v) {
-	//	Vector4 invSize;
-	//	invSize.X = 1.0f / m_model->GetSkinningMatricesTexture()->GetRealSize().Width;
-	//	invSize.Y = 1.0f / m_model->GetSkinningMatricesTexture()->GetRealSize().Height;
-	//	v->SetVector(invSize);
-	//}
-
-	//v = core->FindVariable(_T("lnBoneTexture"));
-	//if (v) {
-	//	v->SetTexture(m_model->GetSkinningMatricesTexture());
-	//}
-}
+//void MeshModelObject::UpdateNodeRenderingParams(MMEShader* priorityShader)
+//{
+//	//Shader* core = priorityShader->GetCoreShader();
+//	//ShaderVariable* v;
+//
+//	//v = core->FindVariable(_T("lnBoneTextureReciprocalSize"));
+//	//if (v) {
+//	//	Vector4 invSize;
+//	//	invSize.X = 1.0f / m_model->GetSkinningMatricesTexture()->GetRealSize().Width;
+//	//	invSize.Y = 1.0f / m_model->GetSkinningMatricesTexture()->GetRealSize().Height;
+//	//	v->SetVector(invSize);
+//	//}
+//
+//	//v = core->FindVariable(_T("lnBoneTexture"));
+//	//if (v) {
+//	//	v->SetTexture(m_model->GetSkinningMatricesTexture());
+//	//}
+//}
 
 //------------------------------------------------------------------------------
 void MeshModelObject::DrawSubset(SceneGraphRenderingContext* dc, int subsetIndex)

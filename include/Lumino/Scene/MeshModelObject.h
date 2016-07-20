@@ -28,7 +28,7 @@ protected:
 	void Initialize(SceneGraph* owner, const StringRef& filePath);
 
 	virtual void OnUpdateFrame(float elapsedTime) override;
-	virtual void UpdateNodeRenderingParams(MMEShader* priorityShader) override;
+	//virtual void UpdateNodeRenderingParams(MMEShader* priorityShader) override;
 	virtual void DrawSubset(SceneGraphRenderingContext* dc, int subsetIndex) override;
 
 private:

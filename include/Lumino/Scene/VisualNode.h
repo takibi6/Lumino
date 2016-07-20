@@ -100,7 +100,7 @@ public:
 	virtual void UpdateAffectLights(LightNodeList* renderingLightList, int maxCount);
 
 	/// ノード単位の描画情報の更新。この後すぐ一連のサブセット描画が始まる
-	virtual void UpdateNodeRenderingParams(MMEShader* priorityShader) {}
+	//virtual void UpdateNodeRenderingParams(MMEShader* priorityShader) {}
 
 
 	// IMMESubsetRenerer
@@ -126,6 +126,7 @@ LN_INTERNAL_ACCESS:
 	//const detail::VisualNodeRenderState& GetVisualNodeRenderState() const { return m_renderState; }
 	Shader* GetPrimaryShader() const;
 	void Render(SceneGraphRenderingContext* dc);
+	detail::SceneShaderInterface* GetMaterialInterface() const { return static_cast<detail::SceneShaderInterface*>(m_materialList[0]->GetShader()->GetMetadata()); }
 
 protected:
 	int						m_subsetCount;

@@ -66,7 +66,7 @@ protected:
 
 	//virtual Material2* GetDefaultMaterial() = 0;
 	//virtual Material2* CreateMaterial() = 0;
-	virtual detail::SceneShaderInterface* CreateMaterialInterface() = 0;
+	virtual void RefisterShader(Shader* shader) = 0;
 
 LN_INTERNAL_ACCESS:
 	//void AddNode(SceneNode* node) { m_allNodes.Add(node); }

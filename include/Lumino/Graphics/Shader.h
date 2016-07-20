@@ -6,6 +6,18 @@
 LN_NAMESPACE_BEGIN
 LN_NAMESPACE_GRAPHICS_BEGIN
 
+namespace detail
+{
+class ShaderMetadata
+	: public RefObject
+{
+public:
+	ShaderMetadata() {}
+	virtual ~ShaderMetadata() {}
+};
+
+} // namespace detail
+
 /**
 	@brief		シェーダのクラスです。
 	@details	シェーダコードテキストの文字コードは ASCII または UTF-8 (BOM無し) 推奨です。
@@ -108,12 +120,17 @@ LN_INTERNAL_ACCESS:
 	bool IsModifiedVariables() const { return m_modifiedVariables; }
 	void TryCommitChanges();
 
+	void SetMetadata(detail::ShaderMetadata* data) { m_metadata = data; }
+	detail::ShaderMetadata* GetMetadata() const { return m_metadata; }
+
 	ByteBuffer					m_sourceCode;
 	Driver::IShader*			m_deviceObj;
 	Array<ShaderVariable*>		m_variables;
 	Array<ShaderTechnique*>		m_techniques;
 	ShaderVariable*				m_viewportPixelSize;
 	bool						m_modifiedVariables;
+
+	RefPtr<detail::ShaderMetadata>		m_metadata;
 };
 
 

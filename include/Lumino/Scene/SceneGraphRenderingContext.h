@@ -14,9 +14,9 @@ class SceneGraphRenderingContext
 	//: public GraphicsContext
 {
 LN_INTERNAL_ACCESS:
-	RenderingPass*				Pass;
-	Camera*						CurrentCamera;
-	MMEShader*					Shader;				// 本当に必要なシェーダ (VisualNode::Render() 以下で使用可能)
+	RenderingPass*					Pass;
+	Camera*							CurrentCamera;
+	detail::SceneShaderInterface*	Shader;				// 本当に必要なシェーダ (VisualNode::Render() 以下で使用可能)
 
 public:
 	GraphicsContext* BeginGraphicsContext() { return m_graphicsContext; }

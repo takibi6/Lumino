@@ -50,7 +50,7 @@ void MMERenderingPass::RenderSubset(SceneGraphRenderingContext* dc, VisualNode* 
 
 	// ノード単位データを更新する
 	priorityParams.Shader->UpdateNodeParams(visualNode, dc->CurrentCamera, *visualNode->GetAffectLightList());
-	visualNode->UpdateNodeRenderingParams(priorityParams.Shader);
+	//visualNode->UpdateNodeRenderingParams(priorityParams.Shader);
 
 	//const Material& material = visualNode->GetVisualNodeParams().GetCombinedSubsetParams(subset).Material;
 	const detail::MaterialInstance* materialInstance = visualNode->GetMaterialList().GetMaterialInstance(subset);

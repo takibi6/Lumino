@@ -137,9 +137,24 @@ void MMDSceneGraph::UpdateFrame(float elapsedTime)
 //}
 
 //------------------------------------------------------------------------------
-detail::SceneShaderInterface* MMDSceneGraph::CreateMaterialInterface()
+//detail::SceneShaderInterface* MMDSceneGraph::CreateMaterialInterface()
+//{
+//	return LN_NEW MmdSceneShaderInterface();
+//}
+
+//------------------------------------------------------------------------------
+void MMDSceneGraph::RefisterShader(Shader* shader)
 {
-	return LN_NEW MmdSceneShaderInterface();
+	if (shader->GetMetadata() != nullptr)
+	{
+		// 他の種類の SceneGraph にアタッチされていないか？
+		LN_THROW(dynamic_cast<MmdSceneShaderInterface*>(shader->GetMetadata()) != nullptr, InvalidOperationException);
+
+		return;	// すでにアタッチ済み
+	}
+
+	auto ptr = RefPtr<MmdSceneShaderInterface>::MakeRef();
+	shader->SetMetadata(ptr);
 }
 
 LN_NAMESPACE_SCENE_END

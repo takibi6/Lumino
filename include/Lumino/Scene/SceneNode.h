@@ -22,7 +22,7 @@ class MaterialInstance;
 // ノート描画直前、サブセット描画直前など、しかるべきタイミングで各ノードの持つshaderに値をセットする。
 // どんな値をどうセットするかは Scene の性質によって異なる。
 class SceneShaderInterface
-	: public RefObject
+	: public ShaderMetadata
 {
 public:
 	SceneShaderInterface();
@@ -196,7 +196,6 @@ LN_INTERNAL_ACCESS:
 	void Initialize(SceneGraph* owner);
 	void SetAutoRemove(bool enabled) { m_isAutoRemove = enabled; }
 	bool IsAutoRemove() const { return m_isAutoRemove; }
-	detail::SceneShaderInterface* GetMaterialInterface() const { return m_materialInterface; }
 
 private:
 	void SetOwnerSceneGraph(SceneGraph* owner);
@@ -204,7 +203,7 @@ private:
 protected:
 	SceneGraphManager*	m_manager;	// TODO: いらない
 	SceneGraph*			m_ownerSceneGraph;
-	RefPtr<detail::SceneShaderInterface>	m_materialInterface;
+	//RefPtr<detail::SceneShaderInterface>	m_materialInterface;
 	String				m_name;
 	Matrix				m_localMatrix;
 	SQTTransform		m_transform;

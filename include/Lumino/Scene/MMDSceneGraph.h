@@ -41,7 +41,8 @@ LN_INTERNAL_ACCESS:
 
 	//virtual Material2* GetDefaultMaterial() override;
 	//virtual Material2* CreateMaterial() override;
-	virtual detail::SceneShaderInterface* CreateMaterialInterface() override;
+	//virtual detail::SceneShaderInterface* CreateMaterialInterface() override;
+	virtual void RefisterShader(Shader* shader) override;
 
 private:
 	//Material2*		m_defaultMaterial;
