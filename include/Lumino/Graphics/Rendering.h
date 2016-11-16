@@ -132,32 +132,24 @@ private:
 	DynamicLightInfo*	m_affectedDynamicLightInfos[DynamicLightInfo::MaxLights];
 };
 
-class DrawElementBatch
+
+class BatchState
 {
 public:
 	static const int MaxMultiRenderTargets = 4;
 
-	struct BuiltinMaterialParameter
-	{
-		//bool		alphaBlendEnabled;
-		//BlendMode	blendMode;
-		Color		blendColor;
-		ToneF		tone;
-	};
+	BatchState();
 
-	//struct ShaderValuePair
-	//{
-	//	ShaderVariable*		variable;
-	//	ShaderValue			value;
-	//};
-
-	DrawElementBatch();
+	void SetBlendMode(BlendMode mode);
 
 	void SetRenderTarget(int index, RenderTarget* renderTarget);
-	RenderTarget* GetRenderTarget(int index) const;
-	void SetMaterial(Material* value);
-	void SetStandaloneShaderRenderer(bool enabled);
-	bool IsStandaloneShaderRenderer() const;
+	RenderTarget* GetRenderTarget(int index) const { return m_renderTargets[index]; }
+
+	void SetDepthBuffer(DepthBuffer* depthBuffer);
+	DepthBuffer* GetDepthBuffer() const { return m_depthBuffer; }
+
+	void SetScissorRect(const Rect& scissorRect);
+	const Rect& GetScissorRect() const { return m_scissorRect; }
 
 	void SetBrush(Brush* brush);
 	Brush* GetBrush() const;
@@ -165,34 +157,13 @@ public:
 	void SetFont(Font* font);
 	Font* GetFont() const;
 
-	void SetBaseBlendMode(BlendMode mode);
-
-
-	bool Equal(const DrawElementBatch& obj) const;
-	void Reset();
 	void ApplyStatus(InternalContext* context, RenderTarget* defaultRenderTarget, DepthBuffer* defaultDepthBuffer);
-	size_t GetHashCode() const;
+	uint32_t GetHashCode() const;
 
-	intptr_t				m_rendererId;
+private:
+	void Reset();
 
-	// render state		TODO: マテリアルに属するステートは必要ない
-	BlendMode				m_baseBlendMode;
-	CullingMode				m_cullingMode;
-	bool					m_alphaTestEnabled;
-
-	BuiltinMaterialParameter	m_builtinMaterialParameter;
-
-	// depth stencil
-	bool					m_depthTestEnabled;
-	bool					m_depthWriteEnabled;
-
-	// TODO: 適用するとなったマテリアルは、描画終了まで Freeze する。パラメータを変更してはならない。
-	// (まるこぴすれば Freeze の必要ないけど、実際描画とマテリアル変更のタイミングは分けるだろう)
-	RefPtr<Material>		m_material;
-	// shader	TODO: サブセット単位でステート変えられるようにしたいこともあるけど、毎回変数値を作るのはちょっと無駄な気がする
-	//RefPtr<ShaderPass>		m_shaderPass;
-	//List<ShaderValuePair>	m_shaderValueList;
-	bool					m_standaloneShaderRenderer;
+	BlendMode				m_blendMode;
 
 	// screen
 	RefPtr<RenderTarget>	m_renderTargets[MaxMultiRenderTargets];
@@ -203,12 +174,42 @@ public:
 	RefPtr<Brush>			m_brush;
 	RefPtr<Font>			m_font;
 
+	mutable size_t			m_hashCode;
+	mutable bool			m_hashDirty;
+};
+
+class DrawElementBatch
+{
+public:
+	DrawElementBatch();
+
+	BatchState	state;
+
+	void SetMaterial(Material* value);
+	Material* GetMaterial() const;
+	void SetStandaloneShaderRenderer(bool enabled);
+	bool IsStandaloneShaderRenderer() const;
+
+
+
+	bool Equal(const DrawElementBatch& obj) const;
+	void Reset();
+	void ApplyStatus(InternalContext* context, RenderTarget* defaultRenderTarget, DepthBuffer* defaultDepthBuffer);
+	size_t GetHashCode() const;
+
+
+
+	intptr_t				m_rendererId;
 
 private:
 
-
-	mutable size_t			m_hashCode;
-	mutable bool			m_hashDirty;
+	// TODO: 適用するとなったマテリアルは、描画終了まで Freeze する。パラメータを変更してはならない。
+	// (まるこぴすれば Freeze の必要ないけど、実際描画とマテリアル変更のタイミングは分けるだろう)
+	RefPtr<Material>		m_material;
+	// shader	TODO: サブセット単位でステート変えられるようにしたいこともあるけど、毎回変数値を作るのはちょっと無駄な気がする
+	//RefPtr<ShaderPass>		m_shaderPass;
+	//List<ShaderValuePair>	m_shaderValueList;
+	bool					m_standaloneShaderRenderer;
 };
 
 class BatchStateBlock

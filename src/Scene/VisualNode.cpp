@@ -78,10 +78,10 @@ void MaterialInstance::OnCombine(Material* owner, Material* parent)
 }
 
 //------------------------------------------------------------------------------
-const Matrix& MaterialInstance::GetUVTransform() const
-{
-	return m_owner->GetUVTransform();
-}
+//const Matrix& MaterialInstance::GetUVTransform() const
+//{
+//	return m_owner->GetUVTransform();
+//}
 
 } // namespace detail
 

@@ -250,13 +250,23 @@ void InternalContext::SwitchActiveRenderer(detail::IRendererPloxy* renderer)
 //==============================================================================
 
 //------------------------------------------------------------------------------
-DrawElementBatch::DrawElementBatch()
+BatchState::BatchState()
 {
 	Reset();
 }
 
 //------------------------------------------------------------------------------
-void DrawElementBatch::SetRenderTarget(int index, RenderTarget* renderTarget)
+void BatchState::SetBlendMode(BlendMode mode)
+{
+	if (m_blendMode != mode)
+	{
+		m_blendMode = mode;
+		m_hashDirty = true;
+	}
+}
+
+//------------------------------------------------------------------------------
+void BatchState::SetRenderTarget(int index, RenderTarget* renderTarget)
 {
 	if (m_renderTargets[index] != renderTarget)
 	{
@@ -266,39 +276,27 @@ void DrawElementBatch::SetRenderTarget(int index, RenderTarget* renderTarget)
 }
 
 //------------------------------------------------------------------------------
-RenderTarget* DrawElementBatch::GetRenderTarget(int index) const
+void BatchState::SetDepthBuffer(DepthBuffer* depthBuffer)
 {
-	return m_renderTargets[index];
-}
-
-//------------------------------------------------------------------------------
-void DrawElementBatch::SetMaterial(Material* value)
-{
-	if (m_material != value)
+	if (m_depthBuffer != depthBuffer)
 	{
-		m_material = value;
+		m_depthBuffer = depthBuffer;
 		m_hashDirty = true;
 	}
 }
 
 //------------------------------------------------------------------------------
-void DrawElementBatch::SetStandaloneShaderRenderer(bool enabled)
+void BatchState::SetScissorRect(const Rect& scissorRect)
 {
-	if (m_standaloneShaderRenderer != enabled)
+	if (m_scissorRect != scissorRect)
 	{
-		m_standaloneShaderRenderer = enabled;
+		m_scissorRect = scissorRect;
 		m_hashDirty = true;
 	}
 }
 
 //------------------------------------------------------------------------------
-bool DrawElementBatch::IsStandaloneShaderRenderer() const
-{
-	return m_standaloneShaderRenderer;
-}
-
-//------------------------------------------------------------------------------
-void DrawElementBatch::SetBrush(Brush* brush)
+void BatchState::SetBrush(Brush* brush)
 {
 	if (m_brush != brush)
 	{
@@ -308,13 +306,13 @@ void DrawElementBatch::SetBrush(Brush* brush)
 }
 
 //------------------------------------------------------------------------------
-Brush* DrawElementBatch::GetBrush() const
+Brush* BatchState::GetBrush() const
 {
 	return m_brush;
 }
 
 //------------------------------------------------------------------------------
-void DrawElementBatch::SetFont(Font* font)
+void BatchState::SetFont(Font* font)
 {
 	if (m_font != font)
 	{
@@ -324,19 +322,116 @@ void DrawElementBatch::SetFont(Font* font)
 }
 
 //------------------------------------------------------------------------------
-Font* DrawElementBatch::GetFont() const
+Font* BatchState::GetFont() const
 {
 	return m_font;
 }
 
 //------------------------------------------------------------------------------
-void DrawElementBatch::SetBaseBlendMode(BlendMode mode)
+void BatchState::Reset()
 {
-	if (m_baseBlendMode != mode)
+	m_blendMode = BlendMode::Normal;
+
+	for (int i = 0; i < MaxMultiRenderTargets; ++i)
+		m_renderTargets[i] = nullptr;
+	m_depthBuffer = nullptr;
+
+	m_hashCode = 0;
+	m_hashDirty = true;
+}
+
+//------------------------------------------------------------------------------
+void BatchState::ApplyStatus(InternalContext* context, RenderTarget* defaultRenderTarget, DepthBuffer* defaultDepthBuffer)
+{
+	auto* stateManager = context->GetRenderStateManager();
+
+	// RenderState
 	{
-		m_baseBlendMode = mode;
-		m_hashDirty = true;
+		// TODO: Base
+		RenderState state;
+		ContextInterface::MakeBlendMode(m_blendMode, &state);
+		//state.Culling = m_cullingMode;
+		//state.AlphaTest = m_alphaTestEnabled;
+		stateManager->SetRenderState(state);
+
+		// スプライトバッチ化のため (TODO: いらないかも。SpriteRenderer では State でそーとしなくなった)
+		context->GetSpriteRenderer()->SetState(state);
 	}
+	// DepthStencilState
+	{
+		//DepthStencilState state;
+		//state.DepthTestEnabled = m_depthTestEnabled;
+		//state.DepthWriteEnabled = m_depthWriteEnabled;
+		//stateManager->SetDepthStencilState(state);
+	}
+	// FrameBuffer
+	{
+		for (int i = 0; i < MaxMultiRenderTargets; ++i)
+		{
+			if (i == 0 && m_renderTargets[i] == nullptr)
+				stateManager->SetRenderTarget(i, defaultRenderTarget);
+			else
+				stateManager->SetRenderTarget(i, m_renderTargets[i]);
+		}
+		if (m_depthBuffer == nullptr)
+			stateManager->SetDepthBuffer(defaultDepthBuffer);
+		else
+			stateManager->SetDepthBuffer(m_depthBuffer);
+		// TODO: m_scissorRect
+	}
+}
+
+//------------------------------------------------------------------------------
+size_t BatchState::GetHashCode() const
+{
+	if (m_hashDirty)
+	{
+		m_hashCode = 0;
+		m_hashDirty = false;
+		m_hashCode = Hash::CalcHash(reinterpret_cast<const char*>(this), sizeof(BatchState));
+	}
+	return m_hashCode;
+}
+
+
+//==============================================================================
+// DrawElementBatch
+//==============================================================================
+
+//------------------------------------------------------------------------------
+DrawElementBatch::DrawElementBatch()
+{
+	Reset();
+}
+
+//------------------------------------------------------------------------------
+void DrawElementBatch::SetMaterial(Material* value)
+{
+	if (m_material != value)
+	{
+		m_material = value;
+	}
+}
+
+//------------------------------------------------------------------------------
+Material* DrawElementBatch::GetMaterial() const
+{
+	return m_material;
+}
+
+//------------------------------------------------------------------------------
+void DrawElementBatch::SetStandaloneShaderRenderer(bool enabled)
+{
+	if (m_standaloneShaderRenderer != enabled)
+	{
+		m_standaloneShaderRenderer = enabled;
+	}
+}
+
+//------------------------------------------------------------------------------
+bool DrawElementBatch::IsStandaloneShaderRenderer() const
+{
+	return m_standaloneShaderRenderer;
 }
 
 //------------------------------------------------------------------------------
@@ -377,102 +472,20 @@ bool DrawElementBatch::Equal(const DrawElementBatch& obj) const
 //------------------------------------------------------------------------------
 void DrawElementBatch::Reset()
 {
-	m_cullingMode = RenderState::Default.Culling;
-	m_alphaTestEnabled = RenderState::Default.AlphaTest;
-	m_baseBlendMode = BlendMode::Normal;
-
-	m_depthTestEnabled = DepthStencilState::Default.DepthTestEnabled;
-	m_depthWriteEnabled = DepthStencilState::Default.DepthWriteEnabled;
-
-	for (int i = 0; i < MaxMultiRenderTargets; ++i)
-		m_renderTargets[i] = nullptr;
-	m_depthBuffer = nullptr;
-
 	m_material = nullptr;
-	//m_shaderValueList.Clear();
-	//m_shaderPass = nullptr;
 	m_standaloneShaderRenderer = false;
-
-	m_hashCode = 0;
-	m_hashDirty = true;
 }
 
 //------------------------------------------------------------------------------
 void DrawElementBatch::ApplyStatus(InternalContext* context, RenderTarget* defaultRenderTarget, DepthBuffer* defaultDepthBuffer)
 {
-	auto* stateManager = context->GetRenderStateManager();
-
-	// RenderState
-	{
-		// TODO: Base
-		RenderState state;
-		ContextInterface::MakeBlendMode(m_baseBlendMode, &state);
-		state.Culling = m_cullingMode;
-		state.AlphaTest = m_alphaTestEnabled;
-		stateManager->SetRenderState(state);
-
-		// スプライトバッチ化のため (TODO: いらないかも。SpriteRenderer では State でそーとしなくなった)
-		context->GetSpriteRenderer()->SetState(state);
-	}
-	// DepthStencilState
-	{
-		DepthStencilState state;
-		state.DepthTestEnabled = m_depthTestEnabled;
-		state.DepthWriteEnabled = m_depthWriteEnabled;
-		stateManager->SetDepthStencilState(state);
-	}
-	// FrameBuffer
-	{
-		for (int i = 0; i < MaxMultiRenderTargets; ++i)
-		{
-			if (i == 0 && m_renderTargets[i] == nullptr)
-				stateManager->SetRenderTarget(i, defaultRenderTarget);
-			else
-				stateManager->SetRenderTarget(i, m_renderTargets[i]);
-		}
-		if (m_depthBuffer == nullptr)
-			stateManager->SetDepthBuffer(defaultDepthBuffer);
-		else
-			stateManager->SetDepthBuffer(m_depthBuffer);
-		// TODO: m_scissorRect
-	}
-	//// Shader
-	//Shader* activeShader = nullptr;
-	//if (m_material != nullptr && m_material->GetShader() != nullptr)
-	//{
-	//	m_material->ApplyToShaderVariables();
-	//	activeShader = m_material->GetShader();
-	//	//ShaderPass* pass = activeShader->GetTechniques().GetAt(0)->GetPasses().GetAt(0);	// TODO: DrawList の実行者によって決定する
-	//	//stateManager->SetShaderPass(pass);
-	//}
-	//else
-	//{
-	//	// TODO: defaultShader の変数がマテリアルのどの情報を欲しているのかはわかる。
-	//	// 変数名検索しなくても、MMEReqVar みたいに enum でなんとかしたい。
-
-	//	activeShader = defaultShader;
-	//	//ShaderPass* pass = activeShader->GetTechniques().GetAt(0)->GetPasses().GetAt(0);	// TODO: DrawList の実行者によって決定する
-	//	//stateManager->SetShaderPass(pass);
-	//}
-	//for (ShaderValuePair& pair : m_shaderValueList)
-	//{
-	//	pair.variable->SetShaderValue(pair.value);
-	//}
-	//stateManager->SetShaderPass(m_shaderPass);
-
-	//return activeShader;
+	state.ApplyStatus(context, defaultRenderTarget, defaultDepthBuffer);
 }
 
 //------------------------------------------------------------------------------
 size_t DrawElementBatch::GetHashCode() const
 {
-	if (m_hashDirty)
-	{
-		m_hashCode = 0;
-		m_hashDirty = false;
-		m_hashCode = Hash::CalcHash(reinterpret_cast<const char*>(this), sizeof(DrawElementBatch));
-	}
-	return m_hashCode;
+	return state.GetHashCode() + reinterpret_cast<size_t>(m_material.Get()) + (int)m_standaloneShaderRenderer;
 }
 
 //==============================================================================
@@ -579,9 +592,9 @@ void DrawElementList::ResolveCombinedMaterials()
 {
 	for (DrawElementBatch& state : m_batchList)
 	{
-		if (state.m_material != nullptr)
+		if (state.GetMaterial() != nullptr)
 		{
-			state.m_material->ResolveCombinedMaterial();
+			state.GetMaterial()->ResolveCombinedMaterial();
 		}
 	}
 }
@@ -677,7 +690,7 @@ void InternalRenderer::Render(
 			if (!currentState->IsStandaloneShaderRenderer())
 			{
 				ElementRenderingPolicy policy;
-				pass->SelectElementRenderingPolicy(element, currentState->m_material, &policy);
+				pass->SelectElementRenderingPolicy(element, currentState->GetMaterial(), &policy);
 				visible = policy.visible;
 
 				if (visible)
@@ -688,7 +701,7 @@ void InternalRenderer::Render(
 					element->MakeElementInfo(cameraInfo, &elementInfo);
 
 					SubsetInfo subsetInfo;
-					element->MakeSubsetInfo(currentState->m_material, &subsetInfo);
+					element->MakeSubsetInfo(currentState->GetMaterial(), &subsetInfo);
 
 					shader->GetSemanticsManager()->UpdateCameraVariables(cameraInfo);
 					shader->GetSemanticsManager()->UpdateElementVariables(elementInfo);
@@ -1015,31 +1028,31 @@ void DrawList::Initialize(detail::GraphicsManager* manager)
 //------------------------------------------------------------------------------
 void DrawList::SetRenderTarget(int index, RenderTarget* renderTarget)
 {
-	m_state.state.SetRenderTarget(index, renderTarget);
+	m_state.state.state.SetRenderTarget(index, renderTarget);
 }
 
 //------------------------------------------------------------------------------
 RenderTarget* DrawList::GetRenderTarget(int index) const
 {
-	return m_state.state.GetRenderTarget(index);
+	return m_state.state.state.GetRenderTarget(index);
 }
 
 //------------------------------------------------------------------------------
 void DrawList::SetBrush(Brush* brush)
 {
-	m_state.state.SetBrush(brush);
+	m_state.state.state.SetBrush(brush);
 }
 
 //------------------------------------------------------------------------------
 void DrawList::SetFont(Font* font)
 {
-	m_state.state.SetFont(font);
+	m_state.state.state.SetFont(font);
 }
 
 //------------------------------------------------------------------------------
 void DrawList::SetBlendMode(BlendMode mode)
 {
-	m_state.state.SetBaseBlendMode(mode);
+	m_state.state.state.SetBlendMode(mode);
 }
 
 //------------------------------------------------------------------------------
@@ -1276,9 +1289,9 @@ public:
 
 void DrawList::DrawRectangle(const RectF& rect)
 {
-	if (m_state.state.GetBrush() != nullptr &&
-		m_state.state.GetBrush()->GetType() == BrushType_Texture &&
-		(static_cast<TextureBrush*>(m_state.state.GetBrush())->GetImageDrawMode() == BrushImageDrawMode::BoxFrame || static_cast<TextureBrush*>(m_state.state.GetBrush())->GetImageDrawMode() == BrushImageDrawMode::BorderFrame))
+	if (m_state.state.state.GetBrush() != nullptr &&
+		m_state.state.state.GetBrush()->GetType() == BrushType_Texture &&
+		(static_cast<TextureBrush*>(m_state.state.state.GetBrush())->GetImageDrawMode() == BrushImageDrawMode::BoxFrame || static_cast<TextureBrush*>(m_state.state.state.GetBrush())->GetImageDrawMode() == BrushImageDrawMode::BorderFrame))
 	{
 		DrawFrameRectangle(rect);
 		return;
